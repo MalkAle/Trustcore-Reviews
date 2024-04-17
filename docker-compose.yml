@@ -18,7 +18,6 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      #test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -ppassword123"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -29,7 +28,7 @@ services:
   init_db:
     build:
       context: .
-      dockerfile: sql_new/init_db/Dockerfile
+      dockerfile: sql/init_db/Dockerfile
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_ROOT_USER: 'root'
@@ -43,7 +42,7 @@ services:
   mysql_api:
     build:
       context: .
-      dockerfile: sql_new/api/Dockerfile
+      dockerfile: sql/api/Dockerfile
     ports: 
       - 8000:8000
     depends_on:
@@ -62,7 +61,7 @@ services:
   import_data_sql:
     build:
       context: .
-      dockerfile: sql_new/import_data/Dockerfile
+      dockerfile: sql/import_data/Dockerfile
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_ROOT_USER: 'root'
@@ -79,7 +78,7 @@ services:
   streamlit:
     build:
       context: .
-      dockerfile: sql_new/visualizations/Dockerfile
+      dockerfile: sql/visualizations/Dockerfile
     environment:
       MYSQL_ROOT_PASSWORD: 'password123'
       MYSQL_HOST: 'sql_db'

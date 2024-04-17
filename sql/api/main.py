@@ -50,7 +50,7 @@ def insert_data(root_password, my_sql_host, df):
     Session = sessionmaker(bind=engine)
     session = Session()
 
-    print(f'Inside insert_data {df.columns}')
+    #print(f'Inside insert_data {df.columns}')
     #print(df)
     
     for _, row in df.iterrows():
@@ -148,7 +148,8 @@ async def import_data(data: ImportData, user: str = Depends(verify_user)):
                                           'Percentage_3', 
                                           'Percentage_2', 
                                           'Percentage_1'])
-    print(f'Received from /import_data {df.columns}')
+    
+    #print(f'Received from /import_data {df.columns}')
     #print(df)
 
     # Insert data into the database

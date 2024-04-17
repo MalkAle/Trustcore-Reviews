@@ -10,8 +10,8 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy Streamlit requirements and script
-COPY ./sql_new/visualizations/requirements.txt ./requirements.txt
-COPY ./sql_new/visualizations/sql_viz_alchemy.py ./
+COPY ./sql/visualizations/requirements.txt ./requirements.txt
+COPY ./sql/visualizations/sql_viz_alchemy.py ./
 
 RUN pip3 install --no-cache-dir --upgrade -r requirements.txt
 

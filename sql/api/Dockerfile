@@ -1,7 +1,7 @@
 FROM python:3.9
 
-COPY ./sql_new/api/requirements.txt /api/requirements.txt
-COPY ./sql_new/api/main.py /api/
+COPY ./sql/api/requirements.txt /api/requirements.txt
+COPY ./sql/api/main.py /api/
 
 RUN pip install --no-cache-dir --upgrade -r /api/requirements.txt
 
