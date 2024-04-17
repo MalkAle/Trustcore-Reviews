@@ -1,0 +1,11 @@
+elastic-transport
+elasticsearch
+matplotlib-inline
+numpy
+pandas
+plotly-express
+SQLAlchemy
+mysql-connector-python
+streamlit
+
+
