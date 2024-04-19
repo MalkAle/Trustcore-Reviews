@@ -11,7 +11,7 @@ services:
    
   sql_db:
     image: mysql
-    #restart: 'no'
+    restart: always
     ports:
       - 3306:3306
     environment:
@@ -26,12 +26,13 @@ services:
       - aj_network
   
   init_db:
+    restart: on-failure
     build:
       context: .
       dockerfile: sql/init_db/Dockerfile
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_ROOT_USER: 'root'
+      MYSQL_ROOT_USER: ${MYSQL_ROOT_USER}
       MYSQL_HOST: ${MYSQL_HOST}
     depends_on:
       sql_db:
@@ -43,6 +44,13 @@ services:
     build:
       context: .
       dockerfile: sql/api/Dockerfile
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_USER: ${MYSQL_ROOT_USER}
+      MYSQL_HOST: ${MYSQL_HOST}
+      FASTAPI_USER: ${FASTAPI_USER}
+      FASTAPI_PASSWORD: ${FASTAPI_PASSWORD}
+      FASTAPI_HOST: ${FASTAPI_HOST}
     ports: 
       - 8000:8000
     depends_on:
@@ -63,10 +71,9 @@ services:
       context: .
       dockerfile: sql/import_data/Dockerfile
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_ROOT_USER: 'root'
-      MYSQL_HOST: ${MYSQL_HOST}
-      COMP_PATH: '/app/scraping'
+      FASTAPI_USER: ${FASTAPI_USER}
+      FASTAPI_PASSWORD: ${FASTAPI_PASSWORD}
+      FASTAPI_HOST: ${FASTAPI_HOST}
     depends_on:
       sql_db:
         condition: service_healthy
@@ -80,8 +87,9 @@ services:
       context: .
       dockerfile: sql/visualizations/Dockerfile
     environment:
-      MYSQL_ROOT_PASSWORD: 'password123'
-      MYSQL_HOST: 'sql_db'
+      FASTAPI_USER: ${FASTAPI_USER}
+      FASTAPI_PASSWORD: ${FASTAPI_PASSWORD}
+      FASTAPI_HOST: ${FASTAPI_HOST}
     depends_on:
       sql_db:
         condition: service_healthy

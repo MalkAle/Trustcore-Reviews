@@ -5,12 +5,17 @@ import requests  # Import requests library
 import streamlit as st
 import plotly.express as px
 
+## API authentication and hostname
+username = os.getenv('FASTAPI_USER')
+password = os.getenv('FASTAPI_PASSWORD')
+host = os.getenv('FASTAPI_HOST')
+
 # Function to load data from MySQL
 def load_data(username, password, endpoint):
     print('Running load_data')
     try:
         # API endpoint URL for fetching data
-        api_url = f'http://mysql_api:8000/get_data/{endpoint}'
+        api_url = f'http://{host}:8000/get_data/{endpoint}'
         
         # Send GET request to fetch data with HTTP Basic Authentication
         response = requests.get(api_url, auth=(username, password))
@@ -79,8 +84,6 @@ def write_scatter(df):
 if __name__ == "__main__":
     print('\nRunning main\n')
     # Get username and password from environment variables or use default values
-    username = os.getenv('MYSQL_ROOT_USER', 'root')
-    password = os.getenv('MYSQL_ROOT_PASSWORD', 'password123')
 
     # Load trust score data from MySQL
     df_trust_score = load_data(username, password, 'trust_score')

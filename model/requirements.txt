@@ -1,7 +1,0 @@
-elasticsearch
-joblib
-pandas
-scikit-learn
-flask
-Flask-Pydantic
-werkzeug

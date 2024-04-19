@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
 
 # Copy Streamlit requirements and script
 COPY ./sql/visualizations/requirements.txt ./requirements.txt
-COPY ./sql/visualizations/sql_viz_alchemy.py ./
+COPY ./sql/visualizations/main.py ./
 
 RUN pip3 install --no-cache-dir --upgrade -r requirements.txt
 
@@ -19,6 +19,6 @@ EXPOSE 8501
 
 HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health
 
-ENTRYPOINT ["streamlit", "run", "sql_viz_alchemy.py", "--server.port=8501", "--server.address=0.0.0.0"]
+ENTRYPOINT ["streamlit", "run", "main.py", "--server.port=8501", "--server.address=0.0.0.0"]
 
 #CMD ["sh", "-c", "while true; do sleep 1000; done"]

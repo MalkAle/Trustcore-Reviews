@@ -1,4 +1,4 @@
-from typing import Optional, List, Dict
+from typing import List, Dict
 from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from pydantic import BaseModel
@@ -6,6 +6,18 @@ from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 import os
 import pandas as pd
+
+
+# Get env vars
+## SQL authentication and hostname
+sql_username = os.getenv('MYSQL_ROOT_USER')
+sql_password = os.getenv('MYSQL_ROOT_PASSWORD')
+sql_host = os.getenv('MYSQL_HOST')
+## API authentication and hostname
+api_username = os.getenv('FASTAPI_USER')
+api_password = os.getenv('FASTAPI_PASSWORD')
+api_host = os.getenv('FASTAPI_HOST')
+
 
 # FastAPI instance
 app = FastAPI(title='User API')
@@ -43,10 +55,21 @@ class ReviewStats(Base):
     trust_score = relationship('TrustScore', backref='Review_stats')
 
 
+# Verify user credentials
+def verify_user(credentials: HTTPBasicCredentials = Depends(security)):
+    print(f'verify_user, {credentials.username}, {api_password}')
+    if (credentials.username == api_username) and (credentials.password == api_password):
+        return credentials.username
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid username or password"
+        )
+
 # Function to insert data into tables
-def insert_data(root_password, my_sql_host, df):
+def insert_data(df):
     print('Inserting data')
-    engine = create_engine(f'mysql+mysqlconnector://root:{root_password}@{my_sql_host}/companies')
+    engine = create_engine(f'mysql+mysqlconnector://{sql_username}:{sql_password}@{sql_host}/companies')
     Session = sessionmaker(bind=engine)
     session = Session()
 
@@ -74,12 +97,12 @@ def insert_data(root_password, my_sql_host, df):
     session.commit()
     session.close()
     print("Data inserted successfully")
-    
+
 
 # Function to fetch trust score data
-def get_trust_score_data(root_password, my_sql_host):
+def get_trust_score_data():
     print('Fetching trust score data')
-    engine = create_engine(f'mysql+mysqlconnector://root:{root_password}@{my_sql_host}/companies')
+    engine = create_engine(f'mysql+mysqlconnector://{sql_username}:{sql_password}@{sql_host}/companies')
     Session = sessionmaker(bind=engine)
     session = Session()
 
@@ -93,9 +116,9 @@ def get_trust_score_data(root_password, my_sql_host):
     return data
 
 # Function to fetch review stats data
-def get_review_stats_data(root_password, my_sql_host):
+def get_review_stats_data():
     print('Fetching review stats data')
-    engine = create_engine(f'mysql+mysqlconnector://root:{root_password}@{my_sql_host}/companies')
+    engine = create_engine(f'mysql+mysqlconnector://{sql_username}:{sql_password}@{sql_host}/companies')
     Session = sessionmaker(bind=engine)
     session = Session()
 
@@ -110,18 +133,6 @@ def get_review_stats_data(root_password, my_sql_host):
     session.close()
     return data
 
-# Verify user credentials
-def verify_user(credentials: HTTPBasicCredentials = Depends(security)):
-    my_sql_root_user = 'root'  # Adjust if needed
-    my_sql_root_password = 'password123'  # Adjust if needed
-
-    if (credentials.username == my_sql_root_user) and (credentials.password == my_sql_root_password):
-        return credentials.username
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid username or password"
-        )
     
 # Get Status function
 @app.get('/status')
@@ -132,8 +143,8 @@ async def get_status():
 
 # Endpoint to import data
 @app.post("/import_data")
-async def import_data(data: ImportData, user: str = Depends(verify_user)):
-    if user != 'root':
+async def import_data(data: ImportData, username: str = Depends(verify_user)):
+    if username != api_username:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You don't have permission to create questions"
@@ -149,34 +160,32 @@ async def import_data(data: ImportData, user: str = Depends(verify_user)):
                                           'Percentage_2', 
                                           'Percentage_1'])
     
-    #print(f'Received from /import_data {df.columns}')
-    #print(df)
 
     # Insert data into the database
-    insert_data('password123', 'sql_db', df)  # Adjust database password and host if needed
+    insert_data(df) 
 
 # Endpoint to retrieve trust score data
 @app.get("/get_data/trust_score")
-async def get_trust_score(user: str = Depends(verify_user)):
-    if user != 'root':
+async def get_trust_score(username: str = Depends(verify_user)):
+    if username != api_username:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You don't have permission to access data"
         )
 
     # Fetch data from the trust_score table
-    data = get_trust_score_data('password123', 'sql_db')  # Adjust database password and host if needed
+    data = get_trust_score_data()  
     return {"data": data}
 
 # Endpoint to retrieve review stats data
 @app.get("/get_data/review_stats")
-async def get_review_stats(user: str = Depends(verify_user)):
-    if user != 'root':
+async def get_review_stats(username: str = Depends(verify_user)):
+    if username != api_username:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You don't have permission to access data"
         )
 
     # Fetch data from the review_stats table
-    data = get_review_stats_data('password123', 'sql_db')  # Adjust database password and host if needed
+    data = get_review_stats_data()  # Adjust database password and host if needed
     return {"data": data}
