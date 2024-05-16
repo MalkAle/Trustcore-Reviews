@@ -1,5 +1,8 @@
 supply_chain_env/
-backup
+backup/
+test/
+
+.env
 test.py
 webscraping_backup.py
 read_reviews.py
