@@ -2,5 +2,8 @@ supply_chain_env/
 backup/
 test/
 
-.env
+*.env
+*.env.example
+*.env.local
+*.env.staging
 
