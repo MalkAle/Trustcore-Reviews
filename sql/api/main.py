@@ -147,7 +147,7 @@ async def import_data(data: ImportData, username: str = Depends(verify_user)):
     if username != api_username:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="You don't have permission to create questions"
+            detail="You don't have permission to import data"
         )
     # Convert received data to DataFrame
     df = pd.DataFrame(data.data, columns=['id',
